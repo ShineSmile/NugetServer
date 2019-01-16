@@ -1,12 +1,14 @@
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Routing;
 using NuGet.Server;
+using NuGet.Server.Infrastructure;
 using NuGet.Server.V2;
 
-[assembly: WebActivatorEx.PreApplicationStartMethod(typeof(Nuget.Server.App_Start.NuGetODataConfig), "Start")]
+[assembly: WebActivatorEx.PreApplicationStartMethod(typeof(NugetServer.App_Start.NuGetODataConfig), "Start")]
 
-namespace Nuget.Server.App_Start 
+namespace NugetServer.App_Start 
 {
     public static class NuGetODataConfig 
 	{
@@ -17,6 +19,11 @@ namespace Nuget.Server.App_Start
             var config = GlobalConfiguration.Configuration;
 
             NuGetV2WebApiEnabler.UseNuGetV2WebApiFeed(config, "NuGetDefault", "nuget", "PackagesOData");
+
+            config.Services.Replace(typeof(IExceptionLogger), new TraceExceptionLogger());
+
+            // Trace.Listeners.Add(new TextWriterTraceListener(HostingEnvironment.MapPath("~/NuGet.Server.log")));
+            // Trace.AutoFlush = true;
 
             config.Routes.MapHttpRoute(
                 name: "NuGetDefault_ClearCache",
